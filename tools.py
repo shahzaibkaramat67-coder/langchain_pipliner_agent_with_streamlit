@@ -1,10 +1,19 @@
 from langchain.tools import tool
 from tavily import TavilyClient
+import os
 
 import requests
 from bs4 import BeautifulSoup
 
-search_engine = TavilyClient()
+
+def search_web(query: str, api_key: str | None = None) -> list[str]:
+    if api_key is None:
+        api_key = os.getenv("TAVILY_API_KEY")
+    if not api_key:
+        raise ValueError("The web search API key is not configured.")
+
+    search_result = TavilyClient(api_key=api_key).search(query=query, max_results=5)
+    return [item["url"] for item in search_result["results"]]
 
 
 @tool
@@ -13,17 +22,7 @@ def search(query):
     search the given quey and return the result
     """
 
-    serach_state = []
-    # state = {}
-
-    search_result = search_engine.search(query=query, max_results=5)
-    for item in search_result["results"]:
-        title = item["title"]
-        URl = item["url"]
-        content = item["content"]
-        serach_state.append(URl)
-
-    return serach_state
+    return search_web(query)
 
 
 @tool

@@ -1,6 +1,7 @@
 langchain
 langchain-core
 langchain-community
+streamlit>=1.57
 
 langchain-google-genai
 langchain-groq

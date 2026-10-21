@@ -8,16 +8,39 @@ memory = Memory()
 # hy i want to study abroad now i am from pakistan and remember that i do not have any bank statement and any money for payment i only have a bacholar degree with 3.10 cgpa and also i do not have nay ielate certificate and my study is about the computer science in artificial intelligenceand also a backend developer now find the best choise for me
 
 
-if __name__ == "__main__":
+# from state import State
+# from pipliner import pipliner
+from rich import print
+
+
+def main():
+    print("[bold violet]AI Agent Orchestrator[/bold violet]")
+    print("Type 'exit' to quit.\n")
+
     while True:
-        user_input = input("Ask Anything : ")
-        # memory.add_memory(user_input, "human")
+        try:
+            user_input = input("Ask Anything: ").strip()
 
-        # stack.append({"type": "input", "content": user_input})
-        if user_input == "Exit" or user_input.lower() == "exit":
+            if user_input.lower() == "exit":
+                print("Goodbye!")
+                break
+
+            if not user_input:
+                continue
+
+            state = State(user_input=user_input)
+            response = pipliner(state)
+
+            print("\n[bold green]Final Answer:[/bold green]")
+            print(response)
+            print("\n" + "-" * 60 + "\n")
+
+        except KeyboardInterrupt:
+            print("\nExiting...")
             break
-        state = State(user_input=user_input)
+        except Exception as error:
+            print(f"[bold red]Error:[/bold red] {error}")
 
-        response = pipliner(state)
-        # response = pipliner(user_input, state.user_input, memory.get_memory())
-        print(response)
+
+if __name__ == "__main__":
+    main()

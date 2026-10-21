@@ -1,13 +1,17 @@
 # from agent import model
-from tools import search, resaerch
+from api_settings import APISettings
+from tools import resaerch, search_web
 from state import State
 
 
-def execute(state):
+def execute(state, settings: APISettings | None = None):
     plan = state.plan
     # tool_input = plan.get("tool_input")
     if plan["tool"] == "search":
-        search_result = search.invoke(plan["tool_input"])
+        search_result = search_web(
+            plan["tool_input"],
+            settings.tavily_api_key if settings else None,
+        )
         state.search_result.append({"Tool": plan["tool"], "Result": search_result})
         return search_result
 

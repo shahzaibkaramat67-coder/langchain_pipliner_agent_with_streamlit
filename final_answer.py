@@ -1,9 +1,10 @@
 from agent import invoke
+from api_settings import APISettings
 from structrure_output import json_response_function
 import json
 
 
-def final_result(state):
+def final_result(state, settings: APISettings | None = None):
 
     system_prompt = """
 You are a professional final response agent.
@@ -27,7 +28,7 @@ State:
 
     data = json.dumps(state.model_dump())
 
-    response = invoke(system_prompt, data)
+    response = invoke(system_prompt, data, settings)
     # print("response", response.choices[0].message.content)
     # content = json_response_function(response.choices[0].message.content)
     return response.choices[0].message.content

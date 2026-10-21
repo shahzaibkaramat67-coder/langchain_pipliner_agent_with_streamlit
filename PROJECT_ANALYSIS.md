@@ -219,3 +219,15 @@ Do not let the planner execute tools itself. Do not let the executor decide whet
 ## Bottom line
 
 The project has the right high-level idea, but its current implementation is not yet a reliable iterative agent. The largest blockers are unvalidated LLM output, incompatible data shapes, the broken rejection branch, and finalization after rejection. Fix those control-flow and type-boundary problems before adding more agents or tools. A single orchestrator with a typed shared state is sufficient for the behavior you described.
+
+## Streamlit interface
+
+The Streamlit front end lives in `streamlit_app.py`; it calls the existing `pipliner(State(...))` backend and keeps chat messages in Streamlit session state. Each assistant response can show the pipeline history, discovered source links, and extracted research excerpts. During a request, the chat status updates live as the pipeline plans, searches or researches sources, evaluates findings, and prepares its answer. Run it from the project root with:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+The app accepts `FREELLMAPI_BASE_URL`, `FREELLMAPI_API_KEY`, `FREELLMAPI_MODEL`, and `TAVILY_API_KEY` from the sidebar, so users can configure their own OpenAI-compatible model endpoint and web-search key without editing `.env`. Existing `.env` values are used as defaults. Sidebar API settings remain in the current browser session and are not written to disk. The interface reports missing settings without displaying their values, and provides a model connection test. The command-line entry point in `main.py` remains available.
+
+When `FREELLMAPI_BASE_URL` points to a local address, the corresponding model server must be running and listening on that address and port before submitting a request. The chat UI reports an unreachable model endpoint without printing the API key.

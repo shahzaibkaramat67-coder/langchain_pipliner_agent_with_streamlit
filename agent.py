@@ -1,40 +1,39 @@
-import os
 from dotenv import load_dotenv
 
 # from langchain_openai import ChatOpenAI
 from openai import OpenAI
+from api_settings import APISettings
 
 # from langchain_google_genai import ChatGoogleGenerativeAI
 
 load_dotenv()
 
-url = os.getenv("FREELLMAPI_BASE_URL")
-key = os.getenv("FREELLMAPI_API_KEY")
-llm = os.getenv("FREELLMAPI_MODEL")
-
-
 # url = os.getenv("OPENROUTER_BASE_URL")
 # key = os.getenv("OPENROUTER_API_KEY")
 # llm = os.getenv("OPENROUTER_MODEL")
-
-# print("url:", url)
-# print("key:", key)
-# print("llm:", llm)
 
 # model = ChatOpenAI(
 #     base_url=url,
 #     api_key=key,
 #     model=llm,
 # )
-client = OpenAI(
-    base_url=url,
-    api_key=key,
-)
+def invoke(prompt, content, settings: APISettings | None = None):
+    settings = settings or APISettings.from_environment()
+    missing = [
+        label
+        for label, value in (
+            ("language-model endpoint", settings.base_url),
+            ("language-model API key", settings.api_key),
+            ("language-model name", settings.model),
+        )
+        if not value
+    ]
+    if missing:
+        raise ValueError(f"Missing required settings: {', '.join(missing)}.")
 
-
-def invoke(prompt, content):
+    client = OpenAI(base_url=settings.base_url, api_key=settings.api_key)
     return client.chat.completions.create(
-        model=llm,
+        model=settings.model,
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": content},

@@ -1,8 +1,9 @@
 from agent import invoke
+from api_settings import APISettings
 from structrure_output import json_response_function
 
 
-def evaluator(user_input, result, history):
+def evaluator(user_input, result, history, settings: APISettings | None = None):
     system_prompt = """
 You are the Evaluator Agent in an AI research and tool-execution pipeline.
 
@@ -257,7 +258,7 @@ Ignore presentation-format requirements when deciding approval or rejection. The
 Return only the required JSON object.
 """
 
-    response = invoke(system_prompt, user_prompt)
+    response = invoke(system_prompt, user_prompt, settings)
     print("response :", response.choices[0].message.content)
     content = json_response_function(response.choices[0].message.content)
     # return response.choices[0].message.content

@@ -5,19 +5,32 @@ from tools import search, resaerch
 from evaluate import evaluator
 from final_answer import final_result
 import json
+from typing import Callable
+from api_settings import APISettings
 from rich import print
 from state import State, AgentHistory
 
 
 # def pipliner(query, stack, memory):
-def pipliner(state: State):
+def pipliner(
+    state: State,
+    progress_callback: Callable[[str], None] | None = None,
+    settings: APISettings | None = None,
+):
 
     memory = Memory()
 
     max_itrate = 5
     for step in range(max_itrate):
+        if progress_callback:
+            stage = (
+                "Planner is planning a follow-up step..."
+                if step
+                else "Planner is analyzing your request..."
+            )
+            progress_callback(stage)
         print("INPUT ENTERING INTO THE PANNING.....")
-        planner_result = planner(state)
+        planner_result = planner(state, settings)
         print("plan_result :", planner_result)
 
         print("THE PLANNER RETUENING THE RESPONSE.....")
@@ -33,8 +46,16 @@ def pipliner(state: State):
         print("HISTORY UPDATE SUCCESSFULLY.....")
         # stack["plan_result"] = plan_result
 
+        if progress_callback:
+            tool = planner_result.get("tool")
+            stage = {
+                "search": "Search agent is searching the web...",
+                "research": "Research agent is investigating source pages...",
+                "none": "Pipeline is preparing the findings for evaluation...",
+            }.get(tool, "Pipeline is executing the planned step...")
+            progress_callback(stage)
         print("NOW FLOW ENTERING INTO THE EXECUTE.....")
-        state.result = execute(state)
+        state.result = execute(state, settings)
         print("NOW THE EXECUTION IS DONE.....")
         state.history.append(
             AgentHistory(
@@ -47,8 +68,10 @@ def pipliner(state: State):
         # stack
         # stack["executor"] = executor
 
+        if progress_callback:
+            progress_callback("Evaluator is checking the gathered information...")
         print("NOW FLOW ENTERING INTO THE evaluator.....")
-        evaluate = evaluator(state.user_input, state.result, state.history)
+        evaluate = evaluator(state.user_input, state.result, state.history, settings)
         state.evaluator = evaluate
         print("NOW THE evaluator IS DONE.....")
         state.history.append(
@@ -64,8 +87,10 @@ def pipliner(state: State):
             continue
 
         if evaluate["evaluator"] == "approved":
+            if progress_callback:
+                progress_callback("Final answer agent is preparing your answer...")
             print("NOW EVALUATION APPROVED NOW PREPAIRING FOR THE FINAL RESPONSE .....")
-            result = final_result(state)
+            result = final_result(state, settings)
             return result
         memory.add_memory(result, "AI")
         return result

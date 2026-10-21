@@ -1,4 +1,5 @@
 from agent import invoke
+from api_settings import APISettings
 from pydantic import BaseModel
 from structrure_output import json_response_function
 
@@ -9,7 +10,7 @@ class plan(BaseModel):
     reason: str
 
 
-def planner(state):
+def planner(state, settings: APISettings | None = None):
     planning_agent_prompt = """
 You are the MAIN PLANNING AGENT in an iterative AI research pipeline.
 
@@ -352,7 +353,7 @@ RETURN ONLY THE JSON OBJECT.
 
     query = state.model_dump_json()
 
-    response = invoke(planning_agent_prompt, query)
+    response = invoke(planning_agent_prompt, query, settings)
 
     # content = response.choices[0].message.content
     content = json_response_function(response.choices[0].message.content)
