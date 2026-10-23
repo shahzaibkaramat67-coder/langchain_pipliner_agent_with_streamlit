@@ -224,7 +224,7 @@ with st.sidebar:
         on_click=clear_conversation,
     )
 
-st.title("Research assistant", icon=":material/travel_explore:")
+st.title("Research assistant")
 st.write(
     "Ask a question. The agent can search the web, investigate relevant pages, "
     "and return a grounded response."
